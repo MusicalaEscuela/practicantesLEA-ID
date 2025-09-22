@@ -1,0 +1,8 @@
+{
+  "tsvUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQupDRkpZEcnhSLXVrzxblaU6iUniIJkFAPLeMhh80rX4L42crBOZKwiraCTsVqpYnaQWZt4vrbdY0s/pub?gid=0&single=true&output=tsv",
+
+  "columns": {
+    "practicanteCol": 0,
+    "horasCol": 7
+  }
+}

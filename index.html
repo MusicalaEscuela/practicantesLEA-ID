@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Actividades de Practicantes · Musicala</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="wrap head">
+      <img src="logo.png" alt="Logo Musicala" class="logo" />
+      <div>
+        <h1 class="h1">Actividades de Practicantes</h1>
+        <div class="sub">Vista general · Filtra por practicante y revisa horas realizadas</div>
+      </div>
+      <div class="spacer"></div>
+      <button id="btn-clear" class="iconbtn" title="Quitar filtro">Quitar filtro</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Izquierda: KPIs + filtros -->
+    <section class="card">
+      <div class="title"><span class="dot dot-brand"></span><h2 style="margin:0">Resumen</h2></div>
+
+      <div class="toolbar">
+        <div class="chips" id="chips-practicantes"><!-- autogenerado --></div>
+      </div>
+
+      <div class="kpis" id="kpis">
+        <div class="k">
+          <div class="v" id="k-actividades">0</div>
+          <div class="l">Actividades</div>
+        </div>
+        <div class="k">
+          <div class="v" id="k-horas">0</div>
+          <div class="l">Horas realizadas</div>
+        </div>
+        <div class="k">
+          <div class="v" id="k-seleccion">Todos</div>
+          <div class="l">Practicante seleccionado</div>
+        </div>
+      </div>
+
+      <!-- Mini-gráfica -->
+      <div class="chartwrap">
+        <canvas id="chart-horas"></canvas>
+      </div>
+      <div class="sub">Distribución de horas por área (filtro aplicado).</div>
+    </section>
+
+    <!-- Derecha: Tabla -->
+    <section class="card">
+      <div class="title"><span class="dot dot-alt"></span><h2 style="margin:0">Lista de actividades</h2></div>
+      <div class="summary" id="summary"></div>
+
+      <div class="tablewrap">
+        <table id="tabla">
+          <thead><tr id="thead-row"></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="foot">Fuente: Hoja pública TSV · Actualiza <em>data.json</em> si cambia el enlace o la estructura.</div>
+    </section>
+  </main>
+
+  <script>
+  (function(){
+    const state = {
+      rawRows: [],
+      headers: [],
+      filterName: null,
+      indices: { practicante: 0, horas: 7, area: 2 },
+      maxHourCell: 1
+    };
+
+    const $ = (s, ctx=document) => ctx.querySelector(s);
+    const $$ = (s, ctx=document) => Array.from(ctx.querySelectorAll(s));
+
+    async function loadConfig(){
+      const res = await fetch('data.json');
+      if(!res.ok) throw new Error('No pude leer data.json');
+      return res.json();
+    }
+
+    async function loadTSV(url){
+      const res = await fetch(url, { cache:'no-store' });
+      if(!res.ok) throw new Error('No pude leer el TSV');
+      const text = await res.text();
+      return text.trim().split(/\r?\n/).map(line => line.split('\t'));
+    }
+
+    function buildHeader(headers){
+      const tr = $('#thead-row');
+      tr.innerHTML = '';
+      headers.forEach((h, i) => {
+        const th = document.createElement('th');
+        th.textContent = h || '';
+        tr.appendChild(th);
+      });
+    }
+
+    function toNumber(val){
+      if(val == null) return 0;
+      const n = parseFloat(String(val).replace(',', '.').trim());
+      return isNaN(n) ? 0 : n;
+    }
+
+    function uniquePracticantes(rows, colIdx){
+      const set = new Set();
+      rows.forEach(r => {
+        const name = (r[colIdx] || '').trim();
+        if(name) set.add(name);
+      });
+      return Array.from(set).sort((a,b)=>a.localeCompare(b,'es'));
+    }
+
+    function renderChips(names){
+      const box = $('#chips-practicantes');
+      box.innerHTML = '';
+      // chip "Todos"
+      const chipAll = document.createElement('div');
+      chipAll.className = 'chip' + (state.filterName ? '' : ' active');
+      chipAll.textContent = 'Todos';
+      chipAll.addEventListener('click', ()=>{ state.filterName=null; update(); });
+      box.appendChild(chipAll);
+
+      names.forEach(n=>{
+        const chip = document.createElement('div');
+        chip.className = 'chip' + (state.filterName === n ? ' active' : '');
+        chip.textContent = n;
+        chip.addEventListener('click', ()=>{ state.filterName = n; update(); });
+        box.appendChild(chip);
+      });
+    }
+
+    function applyFilter(){
+      if(!state.filterName) return state.rawRows;
+      return state.rawRows.filter(r => (r[state.indices.practicante]||'').trim() === state.filterName);
+    }
+
+    function areaBadgeClass(area){
+      // map a 3-tonos (azules/morados)
+      if(!area) return 'badge';
+      const s = area.toLowerCase();
+      if(s.includes('reun') || s.includes('capaci')) return 'badge a-uno';
+      if(s.includes('música') || s.includes('musica')) return 'badge a-dos';
+      return 'badge a-tres';
+    }
+
+    function renderTable(rows){
+      const tbody = $('#tbody');
+      tbody.innerHTML = '';
+
+      // calcular máximo para minigráficas de horas
+      state.maxHourCell = Math.max(1, ...rows.map(r => toNumber(r[state.indices.horas])));
+
+      rows.forEach(r=>{
+        const tr = document.createElement('tr');
+        r.forEach((cell, idx)=>{
+          const td = document.createElement('td');
+
+          // Área como badge
+          if(idx === state.indices.area){
+            const span = document.createElement('span');
+            span.className = areaBadgeClass(String(cell || ''));
+            span.textContent = cell ?? '';
+            td.appendChild(span);
+
+          // Horas con mini-bar
+          }else if(idx === state.indices.horas){
+            const val = toNumber(cell);
+            const pct = Math.min(100, (val / state.maxHourCell) * 100);
+            const wrap = document.createElement('div');
+            wrap.className = 'barcell';
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.setProperty('--pct', pct.toFixed(2) + '%');
+            const fill = document.createElement('i');
+            bar.appendChild(fill);
+            const lbl = document.createElement('div');
+            lbl.className = 'barlabel';
+            lbl.textContent = val.toFixed(2).replace('.', ',');
+            wrap.appendChild(bar); wrap.appendChild(lbl);
+            td.appendChild(wrap);
+          }else{
+            td.textContent = cell ?? '';
+          }
+
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    function computeKPIs(rows){
+      const horas = rows.reduce((acc, r)=> acc + toNumber(r[state.indices.horas]), 0);
+      $('#k-actividades').textContent = rows.length;
+      $('#k-horas').textContent = horas.toFixed(2).replace('.', ',');
+      $('#k-seleccion').textContent = state.filterName || 'Todos';
+
+      const s = $('#summary');
+      const plural = rows.length === 1 ? 'actividad' : 'actividades';
+      s.textContent = `Mostrando ${rows.length} ${plural}. Horas acumuladas: ${horas.toFixed(2).replace('.', ',')}.`;
+    }
+
+    function markActiveChip(){
+      $$('.chip').forEach(ch=>{
+        const isAll = ch.textContent.trim().toLowerCase() === 'todos';
+        const on = (!state.filterName && isAll) || (state.filterName && ch.textContent.trim() === state.filterName);
+        ch.classList.toggle('active', !!on);
+      });
+    }
+
+    /* ====== Chart de horas por área (canvas nativo) ====== */
+    function drawChart(rows){
+      const canvas = $('#chart-horas');
+      const ctx = canvas.getContext('2d');
+
+      // Resize al contenedor visual
+      const rect = canvas.getBoundingClientRect();
+      canvas.width  = Math.max(640, rect.width  * devicePixelRatio);
+      canvas.height = Math.max(240, rect.height * devicePixelRatio);
+      ctx.scale(devicePixelRatio, devicePixelRatio);
+
+      // Datos: sum horas por área
+      const m = new Map();
+      rows.forEach(r=>{
+        const area = (r[state.indices.area] || 'Sin área').trim();
+        m.set(area, (m.get(area) || 0) + toNumber(r[state.indices.horas]));
+      });
+      const labels = Array.from(m.keys());
+      const values = Array.from(m.values());
+      const maxV = Math.max(1, ...values);
+
+      // paleta azul/morado
+      const cols = ['#4f46e5','#7c3aed','#2563eb','#9333ea','#3b82f6','#a78bfa'];
+      const W = rect.width, H = rect.height, pad = 18, baseY = H - pad*1.8;
+      const barW = Math.max(18, (W - pad*2) / (labels.length * 1.8));
+      ctx.clearRect(0,0,W,H);
+
+      // Fondo suave
+      const grd = ctx.createLinearGradient(0,0,W,0);
+      grd.addColorStop(0,'rgba(79,70,229,.06)');
+      grd.addColorStop(1,'rgba(124,58,237,.06)');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0,0,W,H);
+
+      // Ejes
+      ctx.strokeStyle = 'rgba(31,41,55,.25)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pad, baseY+0.5); ctx.lineTo(W-pad, baseY+0.5); ctx.stroke();
+
+      // Barras
+      labels.forEach((lab, i)=>{
+        const x = pad + i * (barW*1.6) + 6;
+        const h = Math.max(4, (values[i] / maxV) * (H - pad*3));
+        const y = baseY - h;
+
+        const g = ctx.createLinearGradient(x, y, x, baseY);
+        g.addColorStop(0, cols[i % cols.length]);
+        g.addColorStop(1, 'rgba(124,58,237,.55)');
+        ctx.fillStyle = g;
+        roundRect(ctx, x, y, barW, h, 8);
+        ctx.fill();
+
+        // valor
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '600 12px Inter, system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(values[i].toFixed(1).replace('.',','), x + barW/2, y - 6);
+
+        // label
+        ctx.fillStyle = '#475569';
+        ctx.font = '500 11px Inter, system-ui, sans-serif';
+        wrapText(ctx, lab, x + barW/2, baseY + 14, barW*1.6);
+      });
+
+      function roundRect(c,x,y,w,h,r){
+        c.beginPath();
+        c.moveTo(x+r,y);
+        c.arcTo(x+w,y,x+w,y+h,r);
+        c.arcTo(x+w,y+h,x,y+h,r);
+        c.arcTo(x,y+h,x,y,r);
+        c.arcTo(x,y,x+w,y,r);
+        c.closePath();
+      }
+      function wrapText(c,text,x,y,maxW){
+        const words = String(text).split(/\s+/);
+        let line = '', lines=[], L=0;
+        for(const w of words){
+          const test = line ? line+' '+w : w;
+          if(c.measureText(test).width > maxW && line){ lines.push(line); line = w; }
+          else{ line = test; }
+        }
+        if(line) lines.push(line);
+        lines.slice(0,2).forEach((ln,j)=> c.fillText(ln, x, y + j*12));
+      }
+    }
+
+    function update(){
+      const rows = applyFilter();
+      renderTable(rows);
+      computeKPIs(rows);
+      markActiveChip();
+      drawChart(rows);
+    }
+
+    $('#btn-clear').addEventListener('click', ()=>{ state.filterName=null; update(); });
+
+    (async function init(){
+      try{
+        const cfg = await loadConfig();
+        state.indices.practicante = Number(cfg?.columns?.practicanteCol ?? 0);
+        state.indices.horas       = Number(cfg?.columns?.horasCol ?? 7);
+        state.indices.area        = Number(cfg?.columns?.areaCol ?? 2);
+
+        const rows = await loadTSV(cfg.tsvUrl);
+        if(!rows.length) throw new Error('TSV vacío');
+        state.headers = rows[0];
+        state.rawRows = rows.slice(1);
+
+        buildHeader(state.headers);
+        renderChips(uniquePracticantes(state.rawRows, state.indices.practicante));
+        update();
+      }catch(err){
+        console.error(err);
+        const tbody = $('#tbody'); tbody.innerHTML = '';
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 6;
+        td.textContent = 'No se pudo cargar la información. Revisa el enlace del TSV en data.json.';
+        tr.appendChild(td); tbody.appendChild(tr);
+      }
+    })();
+  })();
+  </script>
+</body>
+</html>
