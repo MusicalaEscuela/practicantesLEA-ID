@@ -1,8 +1,49 @@
 {
-  "tsvUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQupDRkpZEcnhSLXVrzxblaU6iUniIJkFAPLeMhh80rX4L42crBOZKwiraCTsVqpYnaQWZt4vrbdY0s/pub?gid=0&single=true&output=tsv",
-
-  "columns": {
-    "practicanteCol": 0,
-    "horasCol": 7
+  "pages": [
+    {
+      "id": "practicantes",
+      "mode": "list",
+      "title": "Actividades de Practicantes",
+      "tsvUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQupDRkpZEcnhSLXVrzxblaU6iUniIJkFAPLeMhh80rX4L42crBOZKwiraCTsVqpYnaQWZt4vrbdY0s/pub?gid=0&single=true&output=tsv",
+      "columns": {
+        "filterLabel": "Practicante",
+        "filterCol": 0,
+        "hoursCol": 7,
+        "groupCol": 2,
+        "roleCol": 4
+      },
+      "table": { "visibleCols": "all" }
+    },
+    {
+      "id": "horas_matriz",
+      "mode": "hoursMatrix",
+      "title": "Horas (por semana)",
+      "goal": 4,
+      "tsvUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQupDRkpZEcnhSLXVrzxblaU6iUniIJkFAPLeMhh80rX4L42crBOZKwiraCTsVqpYnaQWZt4vrbdY0s/pub?gid=1566475392&single=true&output=tsv",
+      "matrix": {
+        "nameCol": 0,
+        "weekRow": 0,
+        "dateRow": 1,
+        "startCol": 1,
+        "startRow": 2
+      }
+    },
+    {
+      "id": "horarios_definidos",
+      "mode": "schedules",
+      "title": "Horarios Definidos",
+      "tsvUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQupDRkpZEcnhSLXVrzxblaU6iUniIJkFAPLeMhh80rX4L42crBOZKwiraCTsVqpYnaQWZt4vrbdY0s/pub?gid=1802306410&single=true&output=tsv",
+      "schedules": {
+        "nameCol": 0,
+        "slot1Day": 1,
+        "slot1Hour": 2,
+        "slot2Day": 3,
+        "slot2Hour": 4
+      }
+    }
+  ],
+  "brand": {
+    "logo": "logo.png",
+    "subtitle": "Vista general · Filtra por persona y revisa horas realizadas"
   }
 }
