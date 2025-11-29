@@ -28,6 +28,7 @@
       nav.appendChild(b);
     });
   }
+
   async function handleRoute(){
     const id = location.hash.replace('#','') || APP.cfg.pages[0].id;
     const page = APP.cfg.pages.find(p=>p.id===id) || APP.cfg.pages[0];
@@ -105,20 +106,39 @@
 
   /* ===== Headers */
   function buildHeader_default(){
-    const tr = $('#thead-row'); tr.innerHTML='';
-    resolveVisibleCols().forEach(i=>{
-      const th = document.createElement('th'); th.textContent=APP.headers[i]??''; tr.appendChild(th);
+    const tr = $('#thead-row');
+    tr.innerHTML='';
+    const visibles = resolveVisibleCols();
+
+    visibles.forEach(i=>{
+      const th = document.createElement('th');
+
+      // Etiquetas cortas para la página de Evaluaciones
+      if (APP.page.id === 'evaluaciones') {
+        const customLabels = {
+          0: 'Practicante',
+          7: 'Nota final'
+        };
+        th.textContent = customLabels[i] || (APP.headers[i] ?? '');
+      } else {
+        th.textContent = APP.headers[i] ?? '';
+      }
+
+      tr.appendChild(th);
     });
   }
+
   function buildHeader_weekMatrix(){
     const tr = $('#thead-row'); tr.innerHTML='';
     ['Practicante','Horas','Estado'].forEach(h=>{ const th=document.createElement('th'); th.textContent=h; tr.appendChild(th); });
     $('#tabla').classList.add('week-table');
   }
+
   function buildHeader_schedules(){
     const tr = $('#thead-row'); tr.innerHTML='';
     ['Practicante','Día / Hora'].forEach(h=>{ const th=document.createElement('th'); th.textContent=h; tr.appendChild(th); });
   }
+
   function resolveVisibleCols(){
     const t = APP.page.table?.visibleCols;
     if (t==='all' || !Array.isArray(t)) return APP.headers.map((_,i)=>i);
@@ -203,23 +223,37 @@
   function render_list(rows){
     const tbody = $('#tbody'); tbody.innerHTML='';
     const visible = resolveVisibleCols();
-    const hCol = APP.page.columns.hoursCol, gCol = APP.page.columns.groupCol;
+    const hCol = APP.page.columns.hoursCol;
+    const gCol = APP.page.columns.groupCol;
     const maxHour = Math.max(1, ...rows.map(r=>toNumber(r[hCol])));
 
     rows.forEach(r=>{
       const tr = document.createElement('tr');
       visible.forEach(i=>{
         const td = document.createElement('td');
+
         if (i===gCol){
-          const s=document.createElement('span'); s.className=areaBadgeClass(String(r[i]||'')); s.textContent=r[i]??''; td.appendChild(s);
+          const s=document.createElement('span');
+          s.className=areaBadgeClass(String(r[i]||''));
+          s.textContent=r[i]??'';
+          td.appendChild(s);
+
         } else if (i===hCol){
-          const val = toNumber(r[i]); const pct=Math.min(100,(val/maxHour)*100);
+          const val = toNumber(r[i]);
+          const pct=Math.min(100,(val/maxHour)*100);
           const wrap=document.createElement('div'); wrap.className='barcell';
-          const bar=document.createElement('div'); bar.className='bar'; bar.style.setProperty('--pct', pct.toFixed(2)+'%');
+          const bar=document.createElement('div'); bar.className='bar';
+          bar.style.setProperty('--pct', pct.toFixed(2)+'%');
           bar.appendChild(document.createElement('i'));
-          const lbl=document.createElement('div'); lbl.className='barlabel'; lbl.textContent=val.toFixed(2).replace('.',',');
-          wrap.appendChild(bar); wrap.appendChild(lbl); td.appendChild(wrap);
-        } else { td.textContent=r[i]??''; }
+          const lbl=document.createElement('div'); lbl.className='barlabel';
+          lbl.textContent=val.toFixed(2).replace('.',',');
+          wrap.appendChild(bar); wrap.appendChild(lbl);
+          td.appendChild(wrap);
+
+        } else {
+          td.textContent=r[i]??'';
+        }
+
         tr.appendChild(td);
       });
       tbody.appendChild(tr);
@@ -253,8 +287,12 @@
       const tr=document.createElement('tr');
       const tdN=document.createElement('td'); tdN.textContent=name;
       const tdH=document.createElement('td'); tdH.textContent=hours.toFixed(2).replace('.',',');
-      const tdS=document.createElement('td'); const ok=hours>=goal; tdS.textContent= ok?'Meta cumplida':'Bajo meta'; tdS.className= ok?'state-ok':'state-warn';
-      tr.appendChild(tdN); tr.appendChild(tdH); tr.appendChild(tdS); tbody.appendChild(tr);
+      const tdS=document.createElement('td');
+      const ok=hours>=goal;
+      tdS.textContent= ok?'Meta cumplida':'Bajo meta';
+      tdS.className= ok?'state-ok':'state-warn';
+      tr.appendChild(tdN); tr.appendChild(tdH); tr.appendChild(tdS);
+      tbody.appendChild(tr);
     });
 
     $('#summary').innerHTML = `
@@ -270,7 +308,8 @@
     const tbody = $('#tbody'); const thead = $('#thead-row');
     thead.innerHTML=''; tbody.innerHTML='';
     const tr = document.createElement('tr'); const td = document.createElement('td'); td.colSpan = 2;
-    const grid = document.createElement('div'); grid.className='info-grid'; td.appendChild(grid); tr.appendChild(td); tbody.appendChild(tr);
+    const grid = document.createElement('div'); grid.className='info-grid';
+    td.appendChild(grid); tr.appendChild(td); tbody.appendChild(tr);
 
     const S = APP.page.schedules;
     const dayFilter = APP.weekFilter ? String(APP.weekFilter).toLowerCase() : '';
@@ -282,7 +321,9 @@
 
       const s1d = r[S.slot1Day]  || ''; const s1h = r[S.slot1Hour] || '';
       const s2d = r[S.slot2Day]  || ''; const s2h = r[S.slot2Hour] || '';
-      const slots = []; if (s1d || s1h) slots.push({d:s1d,h:s1h}); if (s2d || s2h) slots.push({d:s2d,h:s2h});
+      const slots = [];
+      if (s1d || s1h) slots.push({d:s1d,h:s1h});
+      if (s2d || s2h) slots.push({d:s2d,h:s2h});
 
       if (dayFilter && !slots.some(s => String(s.d).toLowerCase().includes(dayFilter))) return;
 
@@ -292,11 +333,74 @@
         card.insertAdjacentHTML('beforeend', `<div class="info-line"><span class="info-badge">Horario</span> — </div>`);
       } else {
         slots.slice(0,2).forEach((s,i)=>{
-          card.insertAdjacentHTML('beforeend', `<div class="info-line"><span class="info-badge">Día ${slots.length>1?i+1:''}</span> ${s.d || '—'} &nbsp; <span class="info-badge">Hora</span> ${s.h || '—'}</div>`);
+          card.insertAdjacentHTML(
+            'beforeend',
+            `<div class="info-line">
+               <span class="info-badge">Día ${slots.length>1?i+1:''}</span> ${s.d || '—'}
+               &nbsp; <span class="info-badge">Hora</span> ${s.h || '—'}
+             </div>`
+          );
         });
       }
       grid.appendChild(card);
     });
+  }
+
+  /* ===== Panel detalle Evaluaciones ===== */
+  function renderEvaluacionDetalle(){
+    if (APP.page.id !== 'evaluaciones') return;
+
+    const nameIdx = APP.page.columns.filterCol;
+    let row = null;
+
+    if (APP.filterValue) {
+      row = APP.rows.find(r => (r[nameIdx] || '').trim() === APP.filterValue);
+    } else {
+      row = APP.rows[0];
+    }
+
+    if (!row) {
+      $('#summary').innerHTML = '<p class="sub">No hay evaluaciones registradas.</p>';
+      return;
+    }
+
+    const [
+      practicante,
+      segEst,
+      segAdmin,
+      punt,
+      proy,
+      autoev,
+      promedio,
+      notaFinal,
+      comDoc,
+      comEst
+    ] = row;
+
+    $('#summary').innerHTML = `
+      <div class="eval-detail">
+        <div class="eval-header">
+          <h3>${practicante}</h3>
+          <span class="eval-badge">Nota final: <strong>${notaFinal || '—'}</strong></span>
+        </div>
+
+        <div class="eval-meta">
+          <span>Autoevaluación: <strong>${autoev || '—'}</strong></span>
+          <span>Promedio interno: <strong>${promedio || '—'}</strong></span>
+        </div>
+
+        <div class="eval-grid">
+          <div class="eval-block">
+            <h4>Comentario del docente</h4>
+            <p>${comDoc || 'Sin comentario registrado.'}</p>
+          </div>
+          <div class="eval-block">
+            <h4>Comentario del estudiante</h4>
+            <p>${comEst || 'Sin comentario registrado.'}</p>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   /* ===== KPIs + chart */
@@ -330,16 +434,25 @@
   function drawChart(source){
     const mode = APP.page.mode||'list';
     const canvas=$('#chart-horas'); const ctx=canvas.getContext('2d');
-    const rect=canvas.getBoundingClientRect(); canvas.width=Math.max(640,rect.width*devicePixelRatio); canvas.height=Math.max(240,rect.height*devicePixelRatio);
+    const rect=canvas.getBoundingClientRect();
+    canvas.width=Math.max(640,rect.width*devicePixelRatio);
+    canvas.height=Math.max(240,rect.height*devicePixelRatio);
     ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
     ctx.clearRect(0,0,rect.width,rect.height);
-    if (mode==='schedules'){ $('#chart-sub').textContent='Vista informativa de horarios por practicante.'; return; }
+
+    if (mode==='schedules'){
+      $('#chart-sub').textContent='Vista informativa de horarios por practicante.';
+      return;
+    }
 
     if (mode==='hoursMatrix'){
       const lines = source;
       const { nameCol, startRow } = APP.page.matrix;
       const selected = APP._weeks && APP.weekFilter ? (APP._weeks.find(w=>w.key===APP.weekFilter)?.col) : null;
-      if (selected==null){ $('#chart-sub').textContent='Selecciona una semana para ver la distribución por practicante.'; return; }
+      if (selected==null){
+        $('#chart-sub').textContent='Selecciona una semana para ver la distribución por practicante.';
+        return;
+      }
       const data=[];
       for(let r=startRow; r<lines.length; r++){
         const name=(lines[r][nameCol]||'').trim(); if(!name) continue;
@@ -360,7 +473,8 @@
       const n=(r[nameIdx]||'').trim() || '—';
       map.set(n, (map.get(n)||0) + (Number.isInteger(hCol)? toNumber(r[hCol]) : 1));
     });
-    const labels=[...map.keys()]; const values=labels.map(k=>map.get(k)||0);
+    const labels=[...map.keys()];
+    const values=labels.map(k=>map.get(k)||0);
     bars(ctx, rect.width, rect.height, labels, values);
     $('#chart-sub').textContent='Suma de horas por practicante.';
   }
@@ -368,28 +482,45 @@
   function bars(ctx,W,H,labels,values){
     const pad=18, baseY=H-pad*1.8, maxV=Math.max(1,...values);
     const barW=Math.max(18,(W-pad*2)/(labels.length*1.8));
-    const grd=ctx.createLinearGradient(0,0,W,0); grd.addColorStop(0,'rgba(79,70,229,.06)'); grd.addColorStop(1,'rgba(124,58,237,.06)');
+    const grd=ctx.createLinearGradient(0,0,W,0);
+    grd.addColorStop(0,'rgba(79,70,229,.06)');
+    grd.addColorStop(1,'rgba(124,58,237,.06)');
     ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
-    ctx.strokeStyle='rgba(31,41,55,.25)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(pad,baseY+0.5); ctx.lineTo(W-pad,baseY+0.5); ctx.stroke();
+    ctx.strokeStyle='rgba(31,41,55,.25)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad,baseY+0.5); ctx.lineTo(W-pad,baseY+0.5); ctx.stroke();
     const cols=['#4f46e5','#7c3aed','#2563eb','#9333ea','#3b82f6','#a78bfa'];
     labels.forEach((lab,i)=>{
-      const x=pad+i*(barW*1.6)+6; const h=Math.max(4,(values[i]/maxV)*(H-pad*3)); const y=baseY-h;
-      const g=ctx.createLinearGradient(x,y,x,baseY); g.addColorStop(0,cols[i%cols.length]); g.addColorStop(1,'rgba(124,58,237,.55)');
-      ctx.fillStyle=g; roundRect(ctx,x,y,barW,h,8); ctx.fill();
+      const x=pad+i*(barW*1.6)+6;
+      const h=Math.max(4,(values[i]/maxV)*(H-pad*3));
+      const y=baseY-h;
+      const g=ctx.createLinearGradient(x,y,x,baseY);
+      g.addColorStop(0,cols[i%cols.length]);
+      g.addColorStop(1,'rgba(124,58,237,.55)');
+      ctx.fillStyle=g;
+      roundRect(ctx,x,y,barW,h,8);
+      ctx.fill();
       ctx.fillStyle='#0f172a'; ctx.font='600 12px Inter, system-ui, sans-serif'; ctx.textAlign='center';
       ctx.fillText(values[i].toFixed(1).replace('.',','), x+barW/2, y-6);
-      ctx.fillStyle='#475569'; ctx.font='500 11px Inter, system-ui, sans-serif'; wrapText(ctx,lab,x+barW/2,baseY+14,barW*1.6);
+      ctx.fillStyle='#475569'; ctx.font='500 11px Inter, system-ui, sans-serif';
+      wrapText(ctx,lab,x+barW/2,baseY+14,barW*1.6);
     });
   }
+
   function donut(ctx,W,H,values,labels){
     const cx=W/2, cy=H/2, r=Math.min(W,H)/2-24, inner=r*0.55;
     const total=values.reduce((a,b)=>a+b,0)||1;
     let start=-Math.PI/2;
     const cols=['#4f46e5','#7c3aed','#2563eb','#9333ea','#3b82f6','#a78bfa','#60a5fa','#a78bfa'];
     values.forEach((v,i)=>{
-      const ang=(v/total)*Math.PI*2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,start+ang); ctx.closePath();
-      const g=ctx.createLinearGradient(cx,cy,cx+r,cy); g.addColorStop(0,cols[i%cols.length]); g.addColorStop(1,'rgba(124,58,237,.55)');
-      ctx.fillStyle=g; ctx.fill(); start+=ang;
+      const ang=(v/total)*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,r,start,start+ang);
+      ctx.closePath();
+      const g=ctx.createLinearGradient(cx,cy,cx+r,cy);
+      g.addColorStop(0,cols[i%cols.length]);
+      g.addColorStop(1,'rgba(124,58,237,.55)');
+      ctx.fillStyle=g; ctx.fill();
+      start+=ang;
     });
     // agujero
     ctx.globalCompositeOperation='destination-out';
@@ -429,6 +560,10 @@
       computeKPIs_default(filtered);
       drawChart(filtered);
       if (APP.page.columns?.roleCol != null) renderRoleKPI(filtered);
+
+      if (APP.page.id === 'evaluaciones') {
+        renderEvaluacionDetalle();
+      }
     }
 
     // activar chips (practicantes)
@@ -450,11 +585,18 @@
       map.set(role, (map.get(role)||0)+h);
     });
     const table = `
-      <div class="title" style="margin-top:12px"><span class="dot dot-brand"></span><h3 style="margin:0;font-size:16px">Horas por Rol</h3></div>
+      <div class="title" style="margin-top:12px">
+        <span class="dot dot-brand"></span>
+        <h3 style="margin:0;font-size:16px">Horas por Rol</h3>
+      </div>
       <div class="tablewrap" style="max-height:240px">
         <table>
           <thead><tr><th>Rol</th><th>Horas</th></tr></thead>
-          <tbody>${[...map.entries()].map(([k,v])=>`<tr><td>${k}</td><td><strong>${v.toFixed(2).replace('.',',')}</strong></td></tr>`).join('')}</tbody>
+          <tbody>${
+            [...map.entries()]
+              .map(([k,v])=>`<tr><td>${k}</td><td><strong>${v.toFixed(2).replace('.',',')}</strong></td></tr>`)
+              .join('')
+          }</tbody>
         </table>
       </div>`;
     $('#role-kpi').innerHTML = table;
@@ -465,14 +607,48 @@
     const set = new Set();
     APP.rows.forEach(r=>{
       [S.slot1Day,S.slot2Day].forEach(idx=>{
-        const v = (r[idx]||'').trim(); if (v) set.add(v);
+        const v = (r[idx]||'').trim();
+        if (v) set.add(v);
       });
     });
     return Array.from(set).sort((a,b)=>a.localeCompare(b,'es'));
   }
 
-  function toNumber(v){ const n=parseFloat(String(v??'').replace(',','.').trim()); return Number.isFinite(n)?n:0; }
-  function areaBadgeClass(s){ if(!s) return 'badge'; s=String(s).toLowerCase(); if (s.includes('reun')||s.includes('capaci')) return 'badge a-uno'; if (s.includes('musica')||s.includes('música')) return 'badge a-dos'; return 'badge a-tres'; }
-  function roundRect(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
-  function wrapText(c,text,x,y,maxW){ const words=String(text).split(/\s+/); let line=''; const lines=[]; for(const w of words){ const t=line?line+' '+w:w; if(c.measureText(t).width>maxW && line){lines.push(line); line=w;} else line=t; } if(line) lines.push(line); lines.slice(0,2).forEach((ln,j)=> c.fillText(ln,x,y+j*12)); }
+  function toNumber(v){
+    const n=parseFloat(String(v??'').replace(',','.').trim());
+    return Number.isFinite(n)?n:0;
+  }
+
+  function areaBadgeClass(s){
+    if(!s) return 'badge';
+    s=String(s).toLowerCase();
+    if (s.includes('reun')||s.includes('capaci')) return 'badge a-uno';
+    if (s.includes('musica')||s.includes('música')) return 'badge a-dos';
+    return 'badge a-tres';
+  }
+
+  function roundRect(c,x,y,w,h,r){
+    c.beginPath();
+    c.moveTo(x+r,y);
+    c.arcTo(x+w,y,x+w,y+h,r);
+    c.arcTo(x+w,y+h,x,y+h,r);
+    c.arcTo(x,y+h,x,y,r);
+    c.arcTo(x,y,x+w,y,r);
+    c.closePath();
+  }
+
+  function wrapText(c,text,x,y,maxW){
+    const words=String(text).split(/\s+/);
+    let line=''; const lines=[];
+    for(const w of words){
+      const t=line?line+' '+w:w;
+      if(c.measureText(t).width>maxW && line){
+        lines.push(line); line=w;
+      }else{
+        line=t;
+      }
+    }
+    if(line) lines.push(line);
+    lines.slice(0,2).forEach((ln,j)=> c.fillText(ln,x,y+j*12));
+  }
 })();
