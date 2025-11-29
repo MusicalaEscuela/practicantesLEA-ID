@@ -14,6 +14,7 @@
       },
       "table": { "visibleCols": "all" }
     },
+
     {
       "id": "horas_matriz",
       "mode": "hoursMatrix",
@@ -28,6 +29,7 @@
         "startRow": 2
       }
     },
+
     {
       "id": "horarios_definidos",
       "mode": "schedules",
@@ -40,8 +42,26 @@
         "slot2Day": 3,
         "slot2Hour": 4
       }
+    },
+
+    {
+      "id": "evaluaciones",
+      "mode": "list",
+      "title": "Evaluaciones Finales",
+      "tsvUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQupDRkpZEcnhSLXVrzxblaU6iUniIJkFAPLeMhh80rX4L42crBOZKwiraCTsVqpYnaQWZt4vrbdY0s/pub?gid=575996359&single=true&output=tsv",
+      "columns": {
+        "filterLabel": "Practicante",
+        "filterCol": 0,
+        "hoursCol": null,
+        "groupCol": null,
+        "roleCol": null
+      },
+      "table": {
+        "visibleCols": [0, 7]
+      }
     }
   ],
+
   "brand": {
     "logo": "logo.png",
     "subtitle": "Vista general · Filtra por persona y revisa horas realizadas"
