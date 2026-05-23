@@ -1,99 +1,75 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Actividades · Musicala</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Practicantes LEA - Musicala</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    <div class="wrap head">
-      <img id="app-logo" src="logo.png" alt="Logo Musicala" class="logo" />
+  <header class="topbar">
+    <div class="brand">
+      <img id="brand-logo" src="logo.png" alt="Logo Musicala" />
       <div>
-        <h1 class="h1" id="app-title">Actividades</h1>
-        <div class="sub" id="app-sub">Vista general</div>
+        <p class="eyebrow" id="modeLabel">Panel de consulta</p>
+        <h1 id="brand-title">Practicantes LEA - Musicala</h1>
+        <p id="brand-subtitle">CRUD, asistencia, evaluaciones, proyectos e informes conectados a Google Sheets</p>
       </div>
-      <div class="spacer"></div>
-      <button id="btn-clear" class="iconbtn" title="Quitar filtro">Quitar filtro</button>
     </div>
-    <nav class="navtabs wrap" id="navtabs"></nav>
+    <div class="top-actions">
+      <button class="btn secondary" id="refreshBtn" type="button">Actualizar</button>
+      <button class="btn primary" id="setupBtn" type="button" hidden>Crear / actualizar estructura del Sheet</button>
+    </div>
   </header>
 
-  <main class="wrap">
-    <!-- RESUMEN SUPERIOR -->
-    <section class="card resumen-card">
-      <div class="resumen-header">
-        <h2>Resumen General</h2>
-        <p>Indicadores globales de prácticas • Musicala</p>
-      </div>
+  <main class="layout">
+    <aside class="sidebar no-print" aria-label="Navegacion principal">
+      <button class="nav-item active" data-section="dashboard" type="button">Dashboard</button>
+      <button class="nav-item" data-section="practicantes" type="button">Practicantes</button>
+      <button class="nav-item" data-section="calendario" type="button">Calendario</button>
+      <button class="nav-item" data-section="ajustes_horario" type="button">Ajustes horario</button>
+      <button class="nav-item" data-section="actividades" type="button">Actividades</button>
+      <button class="nav-item" data-section="evaluaciones" type="button">Evaluaciones</button>
+      <button class="nav-item" data-section="retroalimentaciones" type="button">Retroalimentaciones</button>
+      <button class="nav-item" data-section="proyectos" type="button">Proyectos</button>
+      <button class="nav-item" data-section="informes" type="button">Informes</button>
+      <button class="nav-item" data-section="configuracion" type="button" hidden>Configuracion / Estructura</button>
+    </aside>
 
-      <div class="kpi-grid">
-        <div class="kpi-box">
-          <div class="kpi-icon">🎓</div>
-          <div class="kpi-data">
-            <div class="v" id="k-total-practicantes">0</div>
-            <div class="l">Practicantes</div>
-          </div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-icon">📅</div>
-          <div class="kpi-data">
-            <div class="v" id="k-actividades">0</div>
-            <div class="l">Actividades</div>
-          </div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-icon">⏱️</div>
-          <div class="kpi-data">
-            <div class="v" id="k-horas">0</div>
-            <div class="l">Horas totales</div>
-          </div>
-        </div>
-        <div class="kpi-box">
-          <div class="kpi-icon">📊</div>
-          <div class="kpi-data">
-            <div class="v" id="k-promedio">0</div>
-            <div class="l">Promedio por practicante</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="filtros-wrap">
-        <!-- Practicantes ARRIBA (chips grandes) -->
-        <div class="chips gallery" id="chips-practicantes"></div>
-
-        <!-- Barra compacta con select de semana y otros filtros pequeños -->
-        <div class="filtros-top">
-          <div class="mini-filter" id="week-compact"></div>
-          <div id="extra-filters" class="filters"></div>
-        </div>
-      </div>
-
-      <!-- Gráfica global -->
-      <div class="chartwrap"><canvas id="chart-horas"></canvas></div>
-      <div class="sub" id="chart-sub">Distribución (según filtro aplicado).</div>
-
-      <!-- KPI extra por Rol (solo en 'practicantes') -->
-      <div id="role-kpi"></div>
-    </section>
-
-    <!-- PANEL DERECHO -->
-    <section class="card">
-      <div class="title"><span class="dot dot-alt"></span><h2 style="margin:0" id="table-title">Lista</h2></div>
-      <div class="summary" id="summary"></div>
-
-      <div class="tablewrap">
-        <table id="tabla">
-          <thead><tr id="thead-row"></tr></thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-
-      <div class="foot">Fuente: Hojas públicas TSV · Edita <em>data.json</em> para sumar o cambiar secciones.</div>
+    <section class="content">
+      <div id="status" class="status">Cargando panel...</div>
+      <section id="view-dashboard" class="view active"></section>
+      <section id="view-practicantes" class="view"></section>
+      <section id="view-calendario" class="view"></section>
+      <section id="view-ajustes_horario" class="view"></section>
+      <section id="view-actividades" class="view"></section>
+      <section id="view-evaluaciones" class="view"></section>
+      <section id="view-retroalimentaciones" class="view"></section>
+      <section id="view-proyectos" class="view"></section>
+      <section id="view-informes" class="view"></section>
+      <section id="view-configuracion" class="view"></section>
     </section>
   </main>
 
-  <script src="script.js"></script>
+  <dialog id="recordModal" class="modal">
+    <form id="recordForm" method="dialog" class="modal-card">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow" id="modalKicker">Registro</p>
+          <h2 id="modalTitle">Nuevo registro</h2>
+        </div>
+        <button id="closeModalBtn" class="icon-btn" value="cancel" type="button" aria-label="Cerrar">x</button>
+      </div>
+      <div id="formFields" class="form-grid"></div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="cancelFormBtn" type="button">Cancelar</button>
+        <button class="btn primary" id="saveFormBtn" type="submit">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="config.js"></script>
+  <script src="schema.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

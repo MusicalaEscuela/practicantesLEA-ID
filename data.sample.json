@@ -1,0 +1,37 @@
+﻿{
+  "ok": true,
+  "generatedAt": "2026-05-20T20:00:00",
+  "data": {
+    "practicantes": [
+      {"ID":"PRA-001","Nombre completo":"Maria Perez","Documento":"1000001","Correo":"maria@example.com","Telefono":"3001112222","Programa":"LEA","Enfasis":"Música","Institucion":"Universidad Distrital","Coordinador de practica":"Coordinacion LEA","Fecha de inicio":"2026-02-01","Fecha de finalizacion":"2026-06-15","Horario semanal":"Lunes 08:00-12:00\nMiercoles 08:00-12:00","Estado":"Activo","Observaciones":"Registro de muestra","CreatedAt":"2026-05-01T08:00:00","UpdatedAt":"2026-05-01T08:00:00"},
+      {"ID":"PRA-002","Nombre completo":"Juan Gomez","Documento":"1000002","Correo":"juan@example.com","Telefono":"3003334444","Programa":"LEA","Enfasis":"Teatro","Institucion":"Universidad Distrital","Coordinador de practica":"Coordinacion LEA","Fecha de inicio":"2026-02-01","Fecha de finalizacion":"2026-06-15","Horario semanal":"Viernes 15:00-19:00\nSabado 13:00-17:00","Estado":"Activo","Observaciones":"Registro de muestra","CreatedAt":"2026-05-01T08:00:00","UpdatedAt":"2026-05-01T08:00:00"}
+    ],
+    "calendario": [
+      {"ID":"CAL-001","Nombre periodo":"Semestre 2026-1","Fecha de inicio":"2026-02-01","Fecha de finalizacion":"2026-06-15","Dias habilitados":"Lunes, Martes, Miercoles, Jueves, Viernes","Estado":"Activo","Observaciones":"Calendario general de practicas","CreatedAt":"2026-05-01T08:00:00","UpdatedAt":"2026-05-01T08:00:00"}
+    ],
+    "ajustes_horario": [
+      {"ID":"AJU-001","Practicante":"Juan Gomez","Fecha":"2026-05-09","Tipo":"Cambio de horario","Hora inicio":"10:00","Hora fin":"14:00","Observaciones":"Ajuste excepcional de muestra","CreatedAt":"2026-05-01T08:00:00","UpdatedAt":"2026-05-01T08:00:00"}
+    ],
+    "actividades": [
+      {"ID":"ACT-001","Fecha":"2026-05-04","Practicante":"Maria Perez","Tipo de actividad":"Clase","Descripcion":"Apoyo en clase de iniciacion musical y creacion de ejercicio ritmico.","Area":"Musica","Responsable":"Musicala","Evidencia / enlace":"","Observaciones":"Buen manejo de grupo","CreatedAt":"2026-05-04T12:00:00","UpdatedAt":"2026-05-04T12:00:00"},
+      {"ID":"ACT-002","Fecha":"2026-05-06","Practicante":"Juan Gomez","Tipo de actividad":"Apoyo","Descripcion":"Acompanamiento en montaje coreografico grupal.","Area":"Danza","Responsable":"Musicala","Evidencia / enlace":"","Observaciones":"Revisar puntualidad","CreatedAt":"2026-05-06T12:00:00","UpdatedAt":"2026-05-06T12:00:00"}
+    ],
+    "evaluaciones": [
+      {"ID":"EVA-001","Mes":"2026-05","Ano":"2026","Practicante":"Maria Perez","Evaluador":"Alek","Actitud":"5","Apoyo":"5","Calidad":"4","Comunicacion":"5","Disponibilidad de horario":"4","Habilidades artisticas":"5","Habilidades generales":"4","Presentacion personal":"5","Puntualidad":"5","Responsabilidad":"5","Seguimiento de instrucciones":"4","Sentido de pertenencia":"5","Promedio":"4.67","Fortalezas":"Buena disposicion y conexion con estudiantes.","Aspectos por mejorar":"Subir evidencias con mayor constancia.","Recomendaciones":"Mantener seguimiento semanal.","Concepto general":"Proceso solido.","CreatedAt":"2026-05-20T10:00:00","UpdatedAt":"2026-05-20T10:00:00"}
+    ],
+    "retroalimentaciones": [
+      {"ID":"RET-001","Fecha":"2026-05-06","Practicante":"Juan Gomez","Tipo":"Seguimiento","Tema":"Puntualidad","Descripcion":"Llegada 15 minutos despues del horario programado.","Acuerdos":"Llegar 10 minutos antes.","Compromisos":"Revisar transporte y avisar novedades.","Responsable seguimiento":"Musicala","Fecha de seguimiento":"2026-05-13","Estado":"En seguimiento","CreatedAt":"2026-05-06T12:00:00","UpdatedAt":"2026-05-06T12:00:00"}
+    ],
+    "proyectos": [
+      {"ID":"PRO-001","Practicante":"Maria Perez","Nombre del proyecto":"Material ritmico inicial","Descripcion":"Guia corta de ejercicios secuenciados.","Objetivo":"Crear recursos para estudiantes iniciales.","Estado":"En proceso","Fecha de inicio":"2026-05-01","Fecha estimada de cierre":"2026-06-01","Avance %":"45","Evidencias":"","Observaciones":"Avance correcto","CreatedAt":"2026-05-01T10:00:00","UpdatedAt":"2026-05-10T10:00:00"}
+    ],
+    "catalogos": [
+      {"ID":"CAT-001","Tipo":"Programas","Valor":"LEA","Activo":"Si","CreatedAt":"2026-05-01T08:00:00","UpdatedAt":"2026-05-01T08:00:00"}
+    ],
+    "jornadas": [
+      {"Fecha":"2026-05-04","Practicante":"Maria Perez","Ingreso":"08:00","Salida":"12:00","Estado":"Presencial","__nombre":"Maria Perez","__fecha":"2026-05-04","__entrada":"08:00","__salida":"12:00","__estado":"Presencial"},
+      {"Fecha":"2026-05-06","Practicante":"Juan Gomez","Ingreso":"08:25","Salida":"12:00","Estado":"Presencial","__nombre":"Juan Gomez","__fecha":"2026-05-06","__entrada":"08:25","__salida":"12:00","__estado":"Presencial"}
+    ],
+    "jornadasMeta": {"readonly": true, "sheetName": "Registro de Jornadas", "warning": "Datos de muestra. En produccion esta hoja solo se lee."}
+  }
+}
