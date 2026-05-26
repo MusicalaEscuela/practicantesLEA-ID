@@ -96,7 +96,7 @@
       { key: "Mes", type: "month", required: true },
       { key: "Ano", label: "Año", type: "number", system: true },
       { key: "Practicante", type: "person", required: true, main: true },
-      { key: "Evaluador", type: "select", required: true, options: ["Alek", "Cata"] },
+      { key: "Evaluador", type: "select", required: true, catalogType: "Evaluador", options: ["Alek", "Cata", "Camila Rodríguez", "Liceth Rincón"], help: "Puedes agregar mas evaluadores desde Configuracion > Catalogos usando Tipo: Evaluador." },
       { key: "Actitud", type: "score" },
       { key: "Apoyo", type: "score" },
       { key: "Calidad", type: "score" },

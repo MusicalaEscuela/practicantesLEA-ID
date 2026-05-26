@@ -26,7 +26,9 @@
       {"ID":"PRO-001","Practicante":"Maria Perez","Nombre del proyecto":"Material ritmico inicial","Descripcion":"Guia corta de ejercicios secuenciados.","Objetivo":"Crear recursos para estudiantes iniciales.","Estado":"En proceso","Fecha de inicio":"2026-05-01","Fecha estimada de cierre":"2026-06-01","Avance %":"45","Evidencias":"","Observaciones":"Avance correcto","CreatedAt":"2026-05-01T10:00:00","UpdatedAt":"2026-05-10T10:00:00"}
     ],
     "catalogos": [
-      {"ID":"CAT-001","Tipo":"Programas","Valor":"LEA","Activo":"Si","CreatedAt":"2026-05-01T08:00:00","UpdatedAt":"2026-05-01T08:00:00"}
+      {"ID":"CAT-001","Tipo":"Programas","Valor":"LEA","Activo":"Si","CreatedAt":"2026-05-01T08:00:00","UpdatedAt":"2026-05-01T08:00:00"},
+      {"ID":"CAT-002","Tipo":"Evaluador","Valor":"Camila Rodríguez","Activo":"Si","CreatedAt":"2026-05-26T08:00:00","UpdatedAt":"2026-05-26T08:00:00"},
+      {"ID":"CAT-003","Tipo":"Evaluador","Valor":"Liceth Rincón","Activo":"Si","CreatedAt":"2026-05-26T08:00:00","UpdatedAt":"2026-05-26T08:00:00"}
     ],
     "jornadas": [
       {"Fecha":"2026-05-04","Practicante":"Maria Perez","Ingreso":"08:00","Salida":"12:00","Estado":"Presencial","__nombre":"Maria Perez","__fecha":"2026-05-04","__entrada":"08:00","__salida":"12:00","__estado":"Presencial"},

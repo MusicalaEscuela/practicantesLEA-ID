@@ -565,7 +565,7 @@
     const wide = ["textarea", "url", "score"].includes(col.type) ? "wide" : "";
     const help = col.help ? `<small class="field-help">${escapeHtml(col.help)}</small>` : "";
     if (col.type === "textarea") return `<label class="${wide}"><span>${label}</span><textarea name="${escapeAttr(col.key)}" ${col.placeholder ? `placeholder="${escapeAttr(col.placeholder)}"` : ""} ${required}>${escapeHtml(val)}</textarea>${help}</label>`;
-    if (col.type === "select") return `<label class="${wide}"><span>${label}</span><select name="${escapeAttr(col.key)}" ${required}>${optionsHtml(["", ...(col.options || [])], val)}</select></label>`;
+    if (col.type === "select") return `<label class="${wide}"><span>${label}</span><select name="${escapeAttr(col.key)}" ${required}>${optionsHtml(["", ...fieldOptions(col)], val)}</select>${help}</label>`;
     if (col.type === "person") return `<label class="${wide}"><span>${label}</span><select name="${escapeAttr(col.key)}" ${required}>${optionsHtml(["", ...peopleNames()], val)}</select></label>`;
     if (col.type === "score") return scoreFieldHtml(col, val, label, required);
     const type = col.type === "score" ? "number" : ["date", "month", "email", "url", "number", "time"].includes(col.type) ? col.type : "text";
@@ -636,12 +636,21 @@
   function sectionForKey(key) { return key === "catalogos" ? "configuracion" : key; }
   function displayColumns(key) { return SCHEMA[key].columns.filter((c) => !c.system).slice(0, 9).map((c) => c.key); }
   function peopleNames() { return unique((state.data.practicantes || []).map((p) => p["Nombre completo"])).sort(localeSort); }
+  function fieldOptions(col) { return unique([...(col.options || []), ...catalogValues(col.catalogType)]).sort(localeSort); }
+  function catalogValues(type) {
+    if (!type) return [];
+    return (state.data.catalogos || [])
+      .filter((row) => sameText(row.Tipo, type) && !sameText(row.Activo, "No"))
+      .map((row) => row.Valor)
+      .filter(Boolean);
+  }
   function allMonths() { return unique(EDITABLE_KEYS.flatMap((key) => monthOptions(key))).sort().reverse(); }
   function monthOptions(key) { return unique((state.data[key] || []).map((r) => normalizeMonth(r.Mes || r.Fecha || r["Fecha de inicio"]))).filter(Boolean); }
   function typeOptions(key) { return unique((state.data[key] || []).map((r) => r.Tipo || r["Tipo de actividad"] || "")).filter(Boolean); }
   function selectHtml(name, key, label, values, current) { return `<select data-filter="${name}" data-key="${key}" aria-label="${label}">${optionsHtml(values, current, label)}</select>`; }
   function selectReport(name, label, values, current) { return `<select data-report-filter="${name}" aria-label="${label}">${optionsHtml(values, current, label)}</select>`; }
   function optionsHtml(values, current, emptyLabel = "Seleccionar") { return values.map((value) => `<option value="${escapeAttr(value)}" ${String(value) === String(current) ? "selected" : ""}>${escapeHtml(value || emptyLabel)}</option>`).join(""); }
+  function sameText(a, b) { return normalizeText(a) === normalizeText(b); }
   function findPerson(name) { return (state.data.practicantes || []).find((p) => samePerson(p["Nombre completo"], name)); }
   function firstVisiblePerson() { return reportPeople()[0] || (state.data.practicantes || [])[0]; }
   function recentHtml() { const items = [...(state.data.actividades || []).map((r) => [r.Fecha, "Actividad", r.Practicante, r.Descripcion]), ...(state.data.retroalimentaciones || []).map((r) => [r.Fecha, "Retroalimentacion", r.Practicante, r.Tema]), ...(state.data.proyectos || []).map((r) => [r["Fecha de inicio"], "Proyecto", r.Practicante, r["Nombre del proyecto"]])].sort((a, b) => String(b[0]).localeCompare(String(a[0]))).slice(0, 8); return items.length ? `<div class="timeline">${items.map((i) => `<div><strong>${escapeHtml(i[1])} - ${escapeHtml(i[2] || "Sin practicante")}</strong><span>${escapeHtml(i[0] || "Sin fecha")} - ${escapeHtml(i[3] || "")}</span></div>`).join("")}</div>` : `<div class="empty">Sin actividad reciente.</div>`; }

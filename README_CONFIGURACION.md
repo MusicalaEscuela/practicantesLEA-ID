@@ -87,6 +87,15 @@ El panel puede crear, editar y eliminar registros por ID estable en:
 
 Cada registro recibe `ID`, `CreatedAt` y `UpdatedAt`. Al editar se actualiza `UpdatedAt`.
 
+### Agregar evaluadores
+
+El campo `Evaluador` de `Evaluaciones Mensuales` incluye por defecto a Alek, Cata, Camila Rodriguez y Liceth Rincon. Para agregar mas personas sin tocar codigo:
+
+1. Entra al panel en modo administrador.
+2. Abre **Configuracion / Estructura**.
+3. En `Catalogos`, crea un registro con `Tipo` = `Evaluador`, `Valor` = nombre de la persona y `Activo` = `Si`.
+4. Recarga el panel si el nuevo nombre no aparece inmediatamente.
+
 ## 7. Hoja que solo lee el panel
 
 La hoja de jornadas es externa y de solo lectura. El panel intenta encontrarla con estos nombres:
